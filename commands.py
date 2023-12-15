@@ -3,8 +3,8 @@ from fire import Fire
 from mnist_classifier import train
 
 
-class CatDogClassifier:
-    """Yet another cat/dog classifier"""
+class MnistClassifier:
+    """Yet another MNIST classifier"""
 
     def train(self, epochs: int) -> None:
         train()
@@ -14,4 +14,4 @@ class CatDogClassifier:
 
 
 if __name__ == "__main__":
-    Fire(CatDogClassifier)
+    Fire(MnistClassifier)
