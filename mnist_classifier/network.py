@@ -22,4 +22,4 @@ class ConvNet(nn.Module):
         x = self.linear1(x)
         x = F.relu(x)
         x = self.linear2(x)
-        return F.softmax(x, dim=1)
+        return x

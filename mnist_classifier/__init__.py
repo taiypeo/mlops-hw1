@@ -1,3 +1,4 @@
+import json
 import random
 from pathlib import Path
 
@@ -50,3 +51,32 @@ def train(
     Path(save_dir).mkdir(parents=True, exist_ok=True)
     with open(model_path, "wb") as file:
         torch.save(net, file)
+
+
+def infer(
+    data_dir: str, model_dir: str, predictions_path: str, batch_size: int
+) -> None:
+    mnist_test = MNIST(root=data_dir, train=False, download=False, transform=ToTensor())
+    dataloader = DataLoader(dataset=mnist_test, batch_size=batch_size)
+    with open(Path(model_dir) / "model.pt", "rb") as file:
+        net = torch.load(file)
+    net.eval()
+
+    print(f"Performing inference on the test data, {len(dataloader)} batches")
+    predictions = []
+    correct = 0
+    total = 0
+    with torch.inference_mode():
+        for X, y in dataloader:
+            y_hat = net(X)
+
+            batch_predictions = y_hat.argmax(dim=1)
+            predictions.extend(batch_predictions.tolist())
+
+            correct += (batch_predictions == y).sum().item()
+            total += y.size(0)
+
+    print(f"Model's accuracy on the test set: {correct / total}")
+    print(f"Saving predictions to {predictions_path}")
+    with open(predictions_path, "w") as file:
+        json.dump(predictions, file)
