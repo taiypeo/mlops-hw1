@@ -1,2 +1,3 @@
 # mlops-hw1
-Yet another cat/dog classifier
+
+Yet another MNIST digit classifier

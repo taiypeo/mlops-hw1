@@ -1,6 +1,6 @@
 from fire import Fire
 
-from catdog_classifier import train
+from mnist_classifier import train
 
 
 class CatDogClassifier:

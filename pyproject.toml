@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "catdog_classifier"
+name = "mnist_classifier"
 version = "0.1.0"
-description = "Yet another cat/dog classifier"
+description = "Yet another MNIST classifier"
 authors = ["Ivan Lysenko"]
 license = "MIT"
 readme = "README.md"
