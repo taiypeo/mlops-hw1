@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "mlops-hw1"
+name = "catdog_classifier"
 version = "0.1.0"
 description = "Yet another cat/dog classifier"
 authors = ["Ivan Lysenko"]
