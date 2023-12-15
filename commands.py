@@ -6,11 +6,8 @@ from mnist_classifier import train
 class MnistClassifier:
     """Yet another MNIST classifier"""
 
-    def train(self, epochs: int) -> None:
-        train()
-
-    def infer(self, model: str) -> None:
-        pass
+    def __init__(self):
+        self.train = train
 
 
 if __name__ == "__main__":
