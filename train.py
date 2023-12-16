@@ -26,6 +26,9 @@ class TrainParams:
     batch_size: int
     epochs: int
     lr: float
+    n_conv_channels: int
+    n_linear_out_channels: int
+    learn_bias: bool
 
 
 @dataclass
@@ -48,7 +51,11 @@ def train(cfg: MnistConfig) -> None:
     dataloader = DataLoader(
         dataset=mnist_train, batch_size=cfg.params.batch_size, shuffle=True
     )
-    net = ConvNet()
+    net = ConvNet(
+        n_conv_channels=cfg.params.n_conv_channels,
+        n_linear_out_channels=cfg.params.n_linear_out_channels,
+        learn_bias=cfg.params.learn_bias,
+    )
 
     loss_fn = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=cfg.params.lr)
