@@ -13,6 +13,7 @@ torch = {version = "^2.1.2+cpu", source = "pytorch_cpu"}
 torchvision = {version = "^0.16.2+cpu", source = "pytorch_cpu"}
 fire = "^0.5.0"
 tqdm = "^4.66.1"
+dvc = {extras = ["s3"], version = "^3.33.4"}
 
 [tool.poetry.group.dev.dependencies]
 isort = "^5.13.2"

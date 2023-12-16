@@ -1,0 +1,5 @@
+[core]
+    remote = s3bucket
+['remote "s3bucket"']
+    url = s3://ivanlysenko-mlds-mlops-hw1
+    endpointurl = https://storage.yandexcloud.net/
