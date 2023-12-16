@@ -1,0 +1,7 @@
+paths:
+  data_dir: images/
+  save_dir: results/
+params:
+  batch_size: 1000
+  epochs: 10
+  lr: 0.001

@@ -10,11 +10,9 @@ dvc pull
 ```
 
 ### Training
-```bash
-python commands.py train --data-dir images/ --save-dir result/ --batch-size 1000 --epochs 10 --lr 0.001
-```
+1. Change `conf/train_config.yaml`
+2. Run `python train.py`
 
 ### Inference on the test set
-```bash
-python commands.py infer --data-dir images/ --model-dir result/ --predictions-path result/preds.txt --batch-size 1000
-```
+1. Change `conf/infer_config.yaml`
+2. Run `python infer.py`

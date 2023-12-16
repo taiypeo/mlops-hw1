@@ -1,0 +1,6 @@
+paths:
+  data_dir: images/
+  model_dir: results/
+  predictions_path: results/preds.txt
+params:
+  batch_size: 1000
