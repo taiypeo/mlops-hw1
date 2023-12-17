@@ -3,7 +3,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import hydra
+import mlflow
 import torch
+import torch.nn as nn
 from hydra.core.config_store import ConfigStore
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
@@ -28,6 +30,7 @@ class InferenceParams:
 class MnistConfig:
     paths: PathConfig
     params: InferenceParams
+    mlflow_uri: str
 
 
 cs = ConfigStore.instance()
@@ -36,6 +39,9 @@ cs.store(name="mnist_config", node=MnistConfig)
 
 @hydra.main(version_base=None, config_path="conf", config_name="infer_config")
 def infer(cfg: InferenceParams) -> None:
+    mlflow.set_tracking_uri(uri=cfg.mlflow_uri)
+    mlflow.set_experiment("Infer MNIST classifier")
+
     setup_random_seeds()
 
     mnist_test = MNIST(
@@ -46,21 +52,39 @@ def infer(cfg: InferenceParams) -> None:
         net = torch.load(file)
     net.eval()
 
+    loss_fn = nn.CrossEntropyLoss()
+
     print(f"Performing inference on the test data, {len(dataloader)} batches")
-    predictions = []
-    correct = 0
-    total = 0
-    with torch.inference_mode():
-        for X, y in dataloader:
-            y_hat = net(X)
+    with mlflow.start_run():
+        params = {
+            **dict(cfg.paths),
+            **dict(cfg.params),
+        }
+        mlflow.log_params(params)
 
-            batch_predictions = y_hat.argmax(dim=1)
-            predictions.extend(batch_predictions.tolist())
+        losses = []
+        predictions = []
+        correct = 0
+        total = 0
+        with torch.inference_mode():
+            for X, y in dataloader:
+                y_hat = net(X)
+                loss = loss_fn(y_hat, y)
+                losses.append(loss.item())
 
-            correct += (batch_predictions == y).sum().item()
-            total += y.size(0)
+                batch_predictions = y_hat.argmax(dim=1)
+                predictions.extend(batch_predictions.tolist())
 
-    print(f"Model's accuracy on the test set: {correct / total}")
+                correct += (batch_predictions == y).sum().item()
+                total += y.size(0)
+
+            test_loss = sum(losses) / len(losses)
+            mlflow.log_metric("Test loss", test_loss)
+
+            test_accuracy = correct / total
+            mlflow.log_metric("Test accuracy", test_accuracy)
+
+    print(f"Model's accuracy on the test set: {test_accuracy}, " f"loss: {test_loss}")
     print(f"Saving predictions to {cfg.paths.predictions_path}")
     with open(cfg.paths.predictions_path, "w") as file:
         json.dump(predictions, file)

@@ -73,7 +73,6 @@ def train(cfg: MnistConfig) -> None:
 
     with mlflow.start_run():
         params = {
-            "mlflow_uri": cfg.mlflow_uri,
             **dict(cfg.paths),
             **dict(cfg.params),
         }
@@ -96,7 +95,7 @@ def train(cfg: MnistConfig) -> None:
                 correct += (batch_predictions == y).sum().item()
                 total += y.size(0)
 
-            mean_loss = torch.mean(loss)
+            mean_loss = sum(losses) / len(losses)
             mlflow.log_metric("Mean loss", mean_loss)
 
             running_accuracy = correct / total
