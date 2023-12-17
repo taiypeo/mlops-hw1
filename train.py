@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import hydra
+import mlflow
 import torch
 import torch.nn as nn
 import torch.optim as optim
@@ -35,6 +36,7 @@ class TrainParams:
 class MnistConfig:
     paths: PathConfig
     params: TrainParams
+    mlflow_uri: str
 
 
 cs = ConfigStore.instance()
@@ -43,6 +45,9 @@ cs.store(name="mnist_config", node=MnistConfig)
 
 @hydra.main(version_base=None, config_path="conf", config_name="train_config")
 def train(cfg: MnistConfig) -> None:
+    mlflow.set_tracking_uri(uri=cfg.mlflow_uri)
+    mlflow.set_experiment("Train MNIST classifier")
+
     setup_random_seeds()
 
     mnist_train = MNIST(
@@ -65,19 +70,43 @@ def train(cfg: MnistConfig) -> None:
         f"The training will take {cfg.params.epochs} epochs, "
         f"{len(dataloader)} batches each"
     )
-    for epoch in trange(cfg.params.epochs):
-        losses = []
-        for X, y in dataloader:
-            optimizer.zero_grad()
 
-            y_hat = net(X)
-            loss = loss_fn(y_hat, y)
-            loss.backward()
-            optimizer.step()
+    with mlflow.start_run():
+        params = {
+            "mlflow_uri": cfg.mlflow_uri,
+            **dict(cfg.paths),
+            **dict(cfg.params),
+        }
+        mlflow.log_params(params)
+        for epoch in trange(cfg.params.epochs):
+            losses = []
+            correct = 0
+            total = 0
+            for X, y in dataloader:
+                optimizer.zero_grad()
 
-            losses.append(loss.item())
+                y_hat = net(X)
+                loss = loss_fn(y_hat, y)
+                loss.backward()
+                optimizer.step()
 
-        print(f"Epoch {epoch} has finished, current average loss: {torch.mean(loss)}")
+                losses.append(loss.item())
+
+                batch_predictions = y_hat.argmax(dim=1)
+                correct += (batch_predictions == y).sum().item()
+                total += y.size(0)
+
+            mean_loss = torch.mean(loss)
+            mlflow.log_metric("Mean loss", mean_loss)
+
+            running_accuracy = correct / total
+            mlflow.log_metric("Running accuracy", running_accuracy)
+
+            print(
+                f"Epoch {epoch} has finished, "
+                f"current average loss: {mean_loss}, "
+                f"running accuracy: {running_accuracy}"
+            )
 
     model_path = Path(cfg.paths.save_dir) / "model.pt"
     print(f"Finished! Saving the resulting model to {model_path}")

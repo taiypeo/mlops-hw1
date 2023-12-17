@@ -8,3 +8,4 @@ params:
   n_conv_channels: 32
   n_linear_out_channels: 100
   learn_bias: true
+mlflow_uri: "http://127.0.0.1:8080"
