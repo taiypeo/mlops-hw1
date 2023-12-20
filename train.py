@@ -1,3 +1,4 @@
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -14,6 +15,11 @@ from tqdm import trange
 
 from mnist_classifier import setup_random_seeds
 from mnist_classifier.network import ConvNet
+
+
+# https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script
+def get_git_hash():
+    return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
 @dataclass
@@ -37,10 +43,6 @@ class MnistConfig:
     paths: PathConfig
     params: TrainParams
     mlflow_uri: str
-
-
-cs = ConfigStore.instance()
-cs.store(name="mnist_config", node=MnistConfig)
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="train_config")
@@ -73,6 +75,7 @@ def train(cfg: MnistConfig) -> None:
 
     with mlflow.start_run():
         params = {
+            "commit_hash": get_git_hash(),
             **dict(cfg.paths),
             **dict(cfg.params),
         }
@@ -95,6 +98,8 @@ def train(cfg: MnistConfig) -> None:
                 correct += (batch_predictions == y).sum().item()
                 total += y.size(0)
 
+            mlflow.log_metric("Epoch", epoch)
+
             mean_loss = sum(losses) / len(losses)
             mlflow.log_metric("Mean loss", mean_loss)
 
@@ -115,4 +120,7 @@ def train(cfg: MnistConfig) -> None:
 
 
 if __name__ == "__main__":
+    cs = ConfigStore.instance()
+    cs.store(name="mnist_config", node=MnistConfig)
+
     train()

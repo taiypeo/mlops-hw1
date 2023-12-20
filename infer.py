@@ -1,4 +1,5 @@
 import json
+import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -12,6 +13,11 @@ from torchvision.datasets import MNIST
 from torchvision.transforms import ToTensor
 
 from mnist_classifier import setup_random_seeds
+
+
+# https://stackoverflow.com/questions/14989858/get-the-current-git-hash-in-a-python-script
+def get_git_hash():
+    return subprocess.check_output(["git", "rev-parse", "HEAD"]).decode("ascii").strip()
 
 
 @dataclass
@@ -31,10 +37,6 @@ class MnistConfig:
     paths: PathConfig
     params: InferenceParams
     mlflow_uri: str
-
-
-cs = ConfigStore.instance()
-cs.store(name="mnist_config", node=MnistConfig)
 
 
 @hydra.main(version_base=None, config_path="conf", config_name="infer_config")
@@ -57,6 +59,7 @@ def infer(cfg: InferenceParams) -> None:
     print(f"Performing inference on the test data, {len(dataloader)} batches")
     with mlflow.start_run():
         params = {
+            "commit_hash": get_git_hash(),
             **dict(cfg.paths),
             **dict(cfg.params),
         }
@@ -91,4 +94,7 @@ def infer(cfg: InferenceParams) -> None:
 
 
 if __name__ == "__main__":
+    cs = ConfigStore.instance()
+    cs.store(name="mnist_config", node=MnistConfig)
+
     infer()
