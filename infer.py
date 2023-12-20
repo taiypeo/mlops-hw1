@@ -1,10 +1,10 @@
-import json
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
 import hydra
 import mlflow
+import pandas as pd
 import torch
 import torch.nn as nn
 from hydra.core.config_store import ConfigStore
@@ -88,9 +88,10 @@ def infer(cfg: InferenceParams) -> None:
             mlflow.log_metric("Test accuracy", test_accuracy)
 
     print(f"Model's accuracy on the test set: {test_accuracy}, " f"loss: {test_loss}")
+
     print(f"Saving predictions to {cfg.paths.predictions_path}")
-    with open(cfg.paths.predictions_path, "w") as file:
-        json.dump(predictions, file)
+    df = pd.Series(predictions).rename("predictions").reset_index()
+    df.to_csv(cfg.paths.predictions_path, index=False)
 
 
 if __name__ == "__main__":

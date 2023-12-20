@@ -1,7 +1,7 @@
 paths:
   data_dir: images/
   model_dir: results/
-  predictions_path: results/preds.txt
+  predictions_path: results/preds.csv
 params:
   batch_size: 1000
 mlflow_uri: "http://127.0.0.1:8080"
