@@ -4,6 +4,8 @@ Yet another MNIST digit classifier.
 [MNIST](https://en.wikipedia.org/wiki/MNIST_database) is an image dataset that
 contains 28x28 images of hand-written digits from 0 to 9.
 
+The dataset is stored on S3. You can pull it via HTTPS by running `dvc pull`.
+
 ## Important files
 - `train.py` contains the training code for a simple CNN for the MNIST digit classification task
 - `infer.py` contains the inference code for the test set of MNIST
