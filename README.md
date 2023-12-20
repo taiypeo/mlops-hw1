@@ -23,6 +23,12 @@ source .venv/bin/activate
 poetry install
 ```
 
+Alternatively, run
+```bash
+poetry install
+poetry shell
+```
+
 ### Setting up local pre-commit hooks
 1. Run `pre-commit install`
 2. Verify with `pre-commit run -a`
